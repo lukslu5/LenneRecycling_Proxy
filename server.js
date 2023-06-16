@@ -1,6 +1,7 @@
 const express = require('express');
 const http = require('http');
 const querystring = require('querystring');
+const iconv = require('iconv-lite');
 
 const app = express();
 
@@ -30,14 +31,16 @@ app.get('/api', (req, res) => {
 
   // Make the request to the target API
   const request = http.request(options, (response) => {
-    let data = '';
+    const chunks = [];
 
     response.on('data', (chunk) => {
-      data += chunk;
+      chunks.push(chunk);
     });
 
     response.on('end', () => {
-      res.send(data);
+      const data = Buffer.concat(chunks);
+      const decodedData = iconv.decode(data, 'ISO-8859-1'); // Specify the correct encoding used by the response
+      res.send(decodedData);
     });
   });
 
